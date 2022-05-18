@@ -17,7 +17,7 @@ public @interface RequestLimit {
 
     /**
      *
-     * 时间段，单位为毫秒，默认值一分钟
+     * 时间段，单位为毫秒，默认半分钟
      */
     long time() default 3000;
 }

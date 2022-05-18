@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.petparadise.userpet.mapper.UserMapper">
+    
+    <select id="selectCountByPhone" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(user_id) from pet_user where user_phone=#{phone}
+    </select>
+
+    <insert id="insertUser" parameterType="com.petparadise.userpet.model.User">
+        insert into pet_user
+        values(user_id,user_account,user_password,user_phone,user_ip,user_create_time,user_birthday,user_email,user_update_time,user_status);
+    </insert>
 </mapper>
