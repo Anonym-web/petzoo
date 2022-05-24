@@ -1,6 +1,7 @@
 package com.petparadise.userpet.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.petparadise.userpet.exception.LoginException;
 import com.petparadise.userpet.model.LoginVo;
 import com.petparadise.userpet.model.ResultSet;
 import com.petparadise.userpet.model.User;
@@ -37,42 +38,38 @@ public class UserService {
     public ResultSet login(String loginflag, LoginVo user, HttpServletRequest request){
         ResultSet resultSet = new ResultSet();
         //根据登录方式去判断登录的接口
-        boolean flag = judgeLogin(loginflag,user,request);
-        if(flag == true){
-            resultSet.setRetCode("success");
-            resultSet.setDataRows("登录成功");
-        }
+        resultSet = judgeLogin(loginflag,user,request);
         return resultSet;
     }
 
-    private boolean judgeLogin(String loginflag,LoginVo user,HttpServletRequest request) {
+    private ResultSet judgeLogin(String loginflag,LoginVo user,HttpServletRequest request) {
         //先判断是否实现了统一登录接口
+        ResultSet resultSet = new ResultSet();
         try {
             Class c = Class.forName(loginflag+"Login");
             Object loginmeode = c.newInstance();
             if (loginmeode instanceof LoginMode){
                 Method method1 = c.getDeclaredMethod("login");
                 method1.setAccessible(true);
-                return (boolean) method1.invoke(user,request);
+                return (ResultSet) method1.invoke(user,request);
             }else{
-                log.error("-------------该类（"+loginflag+"Login"+"）无法被使用，因为没有实现接口（LoginMode）");
-                return false;
+                return LoginException.codeIllegal("error","该类（"+loginflag+"Login"+"）无法被使用，因为没有实现接口（LoginMode）");
             }
         } catch (ClassNotFoundException e) {
-            log.error("---------------无法找到该类（"+loginflag+"Login"+"）----------------");
-            return false;
+            return LoginException.codeIllegal("error","无法找到该类（"+loginflag+"Login"+"）");
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-            return false;
+            return LoginException.codeIllegal("error",e.getMessage());
         } catch (InstantiationException e) {
             e.printStackTrace();
-            return false;
+            return LoginException.codeIllegal("error",e.getMessage());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
+            return LoginException.codeIllegal("error",e.getMessage());
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+            return LoginException.codeIllegal("error",e.getMessage());
         }
-        return true;
     }
 
     public ResultSet verificationCode(String user_phone) {

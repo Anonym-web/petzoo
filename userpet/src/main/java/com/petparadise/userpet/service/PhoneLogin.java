@@ -1,5 +1,6 @@
 package com.petparadise.userpet.service;
 
+import com.petparadise.userpet.exception.LoginException;
 import com.petparadise.userpet.mapper.UserMapper;
 import com.petparadise.userpet.model.LoginVo;
 import com.petparadise.userpet.model.ResultSet;
@@ -26,7 +27,6 @@ public class PhoneLogin implements LoginMode{
         ResultSet resultSet = new ResultSet();
         User user = loginVo.getUser();
         String phone = user.getUser_phone();
-        boolean flag = false;
         //先去数据库查询是否有这个phone
         int userCount = userMapper.selectCountByPhone(phone);
         if(userCount == 0){
@@ -44,10 +44,11 @@ public class PhoneLogin implements LoginMode{
         if(!"".equals(verificationCode)){
             //证明验证码存在
             if(!verificationCode.equals(loginVo.getVerificationCode())){
-
+                LoginException.loginIllegal("验证码输入错误");
             }
         }else {
             //此用户没有验证码
+            LoginException.loginIllegal("您的验证码没有生成，非法访问");
         }
         resultSet.setRetCode("success");
         return resultSet;

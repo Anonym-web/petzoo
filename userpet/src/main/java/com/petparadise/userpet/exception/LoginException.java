@@ -17,9 +17,19 @@ public class LoginException extends Exception{
      */
     public static ResultSet loginIllegal(String message) {
         ResultSet resultSet = new ResultSet();
-        resultSet.setRetCode("1212");
+        resultSet.setRetCode("success");
         resultSet.setDataRows(message);
-        log.info("----------------------------"+message+"---------------------------------");
+        resultSet.setRetVal(message);
+        log.error("----------------------------"+message+"---------------------------------");
+        return resultSet;
+    }
+
+    public static ResultSet codeIllegal(String code,String message) {
+        ResultSet resultSet = new ResultSet();
+        resultSet.setRetCode(code);
+        resultSet.setDataRows(message);
+        resultSet.setRetVal("服务器繁忙，请稍后再试");
+        log.error("----------------------------"+message+"---------------------------------");
         return resultSet;
     }
 
