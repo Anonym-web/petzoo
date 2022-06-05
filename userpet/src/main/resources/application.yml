@@ -1,0 +1,12 @@
+pring:
+  resources:
+    static-locations: classpath:templates/,classpath:static/
+  mvc:
+    view:
+      prefix: html/
+      suffix: .html
+    static-path-pattern: /static/**
+
+spring:
+  thymeleaf:
+    cache: false

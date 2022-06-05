@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -28,37 +30,42 @@ public class RequestLimitInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        //方法注解
-        RequestLimit methodAnnotation = ((HandlerMethod) handler).getMethodAnnotation(RequestLimit.class);
-        //类注解
-        RequestLimit classAnnotation = ((HandlerMethod) handler).getBean().getClass().getAnnotation(RequestLimit.class);
-        boolean vcode = true;
-        if (methodAnnotation != null) {
-            vcode = validateCode(request, methodAnnotation.count(), methodAnnotation.time());
-        } else if (classAnnotation != null) {
-            vcode = validateCode(request, classAnnotation.count(), classAnnotation.time());
-        }
-        if (vcode) {
-            return true;
-        } else {
-            Map<String, Object> resultMap = Maps.newHashMap();
+        if(handler instanceof HandlerMethod){
+            //方法注解
+            RequestLimit methodAnnotation = ((HandlerMethod) handler).getMethodAnnotation(RequestLimit.class);
+            //类注解
+            RequestLimit classAnnotation = ((HandlerMethod) handler).getBean().getClass().getAnnotation(RequestLimit.class);
+            boolean vcode = true;
+            if (methodAnnotation != null) {
+                vcode = validateCode(request, methodAnnotation.count(), methodAnnotation.time());
+            } else if (classAnnotation != null) {
+                vcode = validateCode(request, classAnnotation.count(), classAnnotation.time());
+            }
+            if (vcode) {
+                return true;
+            } else {
+                Map<String, Object> resultMap = Maps.newHashMap();
 //            resultMap.put("retCode", ResponseCodeEnum.REQUESTFULL.getRetCode());
 //            resultMap.put("retDesc", ResponseCodeEnum.REQUESTFULL.getRetDesc());
-            resultMap.put("retCode", "");
-            resultMap.put("retDesc", "");
-            try {
-                response.setCharacterEncoding("UTF-8");
-                response.setContentType("application/json;charset=UTF-8");
-                PrintWriter pw = response.getWriter();
-                pw.write(JSON.toJSONString(resultMap));
-                pw.flush();
-                pw.close();
-            } catch (IOException e) {
-                logger.error("返回页面数据出错！" + e.getMessage(), e);
-                throw e;
+                resultMap.put("retCode", "");
+                resultMap.put("retDesc", "");
+                try {
+                    response.setCharacterEncoding("UTF-8");
+                    response.setContentType("application/json;charset=UTF-8");
+                    PrintWriter pw = response.getWriter();
+                    pw.write(JSON.toJSONString(resultMap));
+                    pw.flush();
+                    pw.close();
+                } catch (IOException e) {
+                    logger.error("返回页面数据出错！" + e.getMessage(), e);
+                    throw e;
+                }
+                return false;
             }
-            return false;
+        }else if(handler instanceof ResourceHttpRequestHandler){
+            return true;
         }
+        return false;
     }
 
     /**
